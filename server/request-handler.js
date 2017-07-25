@@ -71,35 +71,34 @@ exports.requestHandler = function(request, response) {
 
   response.writeHead(statusCode, headers);
 
-  if (request.method === 'GET') {
+  if ((request.method === 'POST') && (request.url === '/classes/messages')) {
+    //sending data to server
+    request.on('data', function(chunk) {
+      results.push(JSON.parse(chunk));
+      statusCode = 201;
+      response.writeHead(statusCode);
+    });
+
+    request.on('error', function(error) {
+      console.error('error');
+      statusCode = 400;
+      response.writeHead(statusCode);
+      response.end();
+    });
+
+    request.on('end', function() {
+      response.end();
+    });
+
+  } else if ((request.method === 'GET') && (request.url === '/classes/messages')) {
     //getting data from server
     //error
-    request.on('error', (error) => {
+    request.on('error', function(error) {
       statusCode = 400;
       response.writeHead(statusCode);
       response.end();
     });
     //send back all result
     response.end(JSON.stringify({results}));
-
-  } else if (request.method === 'POST') {
-    //sending data to server
-    request.on('data', (chunk) => {
-      results.push(JSON.parse(chunk));
-      statusCode = 200;
-      response.writeHead(statusCode);
-    });
-
-    request.on('error', (error) => {
-      console.error('error');
-      statusCode = 400;
-      response.writeHead(statusCode);
-      //nothing to return
-      response.end();
-    });
-
-    request.on('end', () => {
-      response.end();
-    });
   }
 };
